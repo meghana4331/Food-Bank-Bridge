@@ -1,1 +1,28 @@
 
+trigger UpdateTotalDonations on Food_Donation__c (after insert, after update, after delete) {
+    Set<Id> charityOrgIds = new Set<Id>();
+
+    // Collect Charity Organization Ids from inserted/updated/deleted Food Donation records
+    if (Trigger.isInsert || Trigger.isUpdate) {
+        for (Food_Donation__c donation : Trigger.new) {
+            charityOrgIds.add(donation.Charity_Organization__c);
+        }
+    }
+    if (Trigger.isDelete) {
+        for (Food_Donation__c donation : Trigger.old) {
+            charityOrgIds.add(donation.Charity_Organization__c);
+        }
+    }
+
+    // Aggregate Donations and update Charity Organizations
+    List<Charity_Organization_c> charitiesToUpdate = new List<Charity_Organization_c>();
+    for (Id charityId : charityOrgIds) {
+        AggregateResult[] results = [SELECT SUM(Quantity_c) totalDonations FROM Food_Donationc WHERE Charity_Organization_c = :charityId];
+        Charity_Organization_c charity = new Charity_Organization_c(
+            Id = charityId,
+            Total_Donations_Received__c = (Decimal) (results[0].get('totalDonations') != null ? results[0].get('totalDonations') : 0)
+        );
+        charitiesToUpdate.add(charity);
+    }
+    update charitiesToUpdate;
+}
