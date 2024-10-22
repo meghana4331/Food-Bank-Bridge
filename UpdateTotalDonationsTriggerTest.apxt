@@ -1,0 +1,77 @@
+@isTest
+public class UpdateTotalDonationsTriggerTest {
+    @isTest static void testInsertFoodDonation() {
+        // Create a Charity Organization record
+        Charity_Organization_c charity = new Charity_Organization_c(
+            Name = 'Charity Test',
+            Capacity__c = 100,
+            Total_Donations_Received__c = 0
+        );
+        insert charity;
+        
+        // Create a Food Donation record
+        Food_Donation_c donation = new Food_Donation_c(
+            Name = 'Donation Test',
+            Type__c = 'Perishable',
+            Quantity__c = 10,
+            Expiration_Date__c = Date.today().addDays(10),
+            Charity_Organization__c = charity.Id,
+            Status__c = 'Pending'
+        );
+        insert donation;
+        
+                charity = [SELECT Id, Total_Donations_Received_c FROM Charity_Organization_c WHERE Id = :charity.Id];
+        System.assertEquals(10, charity.Total_Donations_Received__c);
+    }
+    
+    @isTest static void testUpdateFoodDonation() {
+        // Create a Charity Organization record
+        Charity_Organization_c charity = new Charity_Organization_c(
+            Name = 'Charity Test',
+            Capacity__c = 100,
+            Total_Donations_Received__c = 0
+        );
+        insert charity;
+        
+      
+        Food_Donation_c donation = new Food_Donation_c(
+            Name = 'Donation Test',
+            Type__c = 'Perishable',
+            Quantity__c = 10,
+            Expiration_Date__c = Date.today().addDays(10),
+            Charity_Organization__c = charity.Id,
+            Status__c = 'Pending'
+        );
+        insert donation;
+        
+               donation.Quantity__c = 20;
+        update donation;
+        
+               charity = [SELECT Id, Total_Donations_Received_c FROM Charity_Organization_c WHERE Id = :charity.Id];
+        System.assertEquals(20, charity.Total_Donations_Received__c);
+    }
+    
+    @isTest static void testDeleteFoodDonation() {
+               Charity_Organization_c charity = new Charity_Organization_c(
+            Name = 'Charity Test',
+            Capacity__c = 100,
+            Total_Donations_Received__c = 0
+        );
+        insert charity;
+        
+               Food_Donation_c donation = new Food_Donation_c(
+            Name = 'Donation Test',
+            Type__c = 'Perishable',
+            Quantity__c = 10,
+            Expiration_Date__c = Date.today().addDays(10),
+            Charity_Organization__c = charity.Id,
+            Status__c = 'Pending'
+        );
+        insert donation;
+        
+                delete donation;
+        
+               charity = [SELECT Id, Total_Donations_Received_c FROM Charity_Organization_c WHERE Id = :charity.Id];
+        System.assertEquals(0, charity.Total_Donations_Received__c);
+    }
+}
